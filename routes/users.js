@@ -100,7 +100,7 @@ router.post('/', (req, res, next) => {
   let {username, password, fullname} = req.body;
   // Username and password come in pre-trimmed, otherwise we throw an error
   // before this
-  fullname = fullname.trim();
+  //fullname = fullname.trim();
 
 
   return User.hashPassword(password)
