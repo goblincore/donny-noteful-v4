@@ -1,4 +1,4 @@
-/* global store $ */
+/* global $, store */
 'use strict';
 
 const api = (function () {
@@ -7,7 +7,7 @@ const api = (function () {
       type: 'GET',
       url: path,
       dataType: 'json',
-      data: query, 
+      data: query,
       headers: { 'Authorization': `Bearer ${store.authToken}` }
     });
   };

@@ -2,28 +2,29 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+//const passport = require('passport');
 
 const User = require('../models/user');
 
 const router = express.Router();
 
-/* ========== POST/CREATE A USER ========== */
+//router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
+
+
 
 router.post('/', (req, res, next) => {
-    console.log(req.body);
-  
-  //required fields
   const requiredFields = ['username', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
-
-  //check for if missing field (e.g. no username or password)
+  
+  //The username and password fields are required
   if (missingField) {
     const err = new Error(`Missing '${missingField}' in request body`);
     err.status = 422;
     return next(err);
   }
-  //check for if field inputs are strings
-  const stringFields = ['username', 'password', 'firstName', 'lastName'];
+  
+  //The fields are type string
+  const stringFields = ['username', 'password', 'fullName'];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== 'string'
   );
@@ -36,16 +37,8 @@ router.post('/', (req, res, next) => {
       location: nonStringField
     });
   }
-  
   //The username and password should not have leading or trailing whitespace. 
-  //And the endpoint should not automatically trim the values
-// If the username and password aren't trimmed we give an error.  Users might
-  // expect that these will work without trimming (i.e. they want the password
-  // "foobar ", including the space at the end).  We need to reject such values
-  // explicitly so the users know what's happening, rather than silently
-  // trimming them and expecting the user to understand.
-  // We'll silently trim the other fields, because they aren't credentials used
-  // to log in, so it's less of a problem.
+  // And the endpoint should not automatically trim the values
   const explicityTrimmedFields = ['username', 'password'];
   const nonTrimmedField = explicityTrimmedFields.find(
     field => req.body[field].trim() !== req.body[field]
@@ -60,6 +53,8 @@ router.post('/', (req, res, next) => {
     });
   }
 
+  //The username is a minimum of 1 character
+  //The password is a minimum of 8 and max of 72 characters
   const sizedFields = {
     username: {
       min: 1
@@ -95,20 +90,20 @@ router.post('/', (req, res, next) => {
     });
   }
 
- // const {username, password, fullname } = req.body;
 
-  let {username, password, fullname} = req.body;
-  // Username and password come in pre-trimmed, otherwise we throw an error
-  // before this
-  //fullname = fullname.trim();
+  
+  
+  
+  let {username, fullName = '', password} = req.body;
 
-
+  fullName = fullName.trim();
+  
   return User.hashPassword(password)
     .then(digest => {
       const newUser = {
         username,
         password: digest,
-        fullname
+        fullName
       };
       return User.create(newUser);
     })
@@ -123,9 +118,10 @@ router.post('/', (req, res, next) => {
       next(err);
     });
 
+
 });
 
+
+
+
 module.exports = router;
-
-
-
