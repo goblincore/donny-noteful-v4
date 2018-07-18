@@ -10,7 +10,7 @@ const router = express.Router();
 /* ========== POST/CREATE A USER ========== */
 
 router.post('/', (req, res, next) => {
- 
+    console.log(req.body);
   
   //required fields
   const requiredFields = ['username', 'password'];
